@@ -16,6 +16,7 @@ export class View {
 		this.$.p1Wins = this.#qs('[data-id="p1-wins"]')
 		this.$.p2Wins = this.#qs('[data-id="p2-wins"]')
 		this.$.ties = this.#qs('[data-id="ties"]')
+		this.$.grid = this.#qs('[data-id="grid"]')
 		// ui only event listeners
 		this.$.menuBtn.addEventListener('click', () => {
 			this.#toggleMenu()
@@ -53,9 +54,7 @@ export class View {
 		this.$.newRoundBtn.addEventListener('click', handler)
 	}
 	bindPlayerMoveEvent(handler) {
-		this.$.squares.forEach(square => {
-			square.addEventListener('click', handler)
-		})
+		this.#delegate(this.$.grid, '[data-id="square"]', 'click', handler)
 	}
 	// utility methods
 
@@ -151,5 +150,13 @@ export class View {
 		}
 
 		return elList
+	}
+
+	#delegate(el, selector, eventKey, handler) {
+		el.addEventListener(eventKey, event => {
+			if (event.target.matches(selector)) {
+				handler(event.target)
+			}
+		})
 	}
 }

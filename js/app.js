@@ -21,8 +21,7 @@ function init() {
 		store.newRound()
 	})
 
-	view.bindPlayerMoveEvent(e => {
-		const currentSquare = e.target
+	view.bindPlayerMoveEvent(currentSquare => {
 		const isMoveExist = checkIsMoveExist(store.game.players, currentSquare.id)
 
 		if (isMoveExist) {
