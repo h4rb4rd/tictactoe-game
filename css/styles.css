@@ -59,7 +59,7 @@ button:hover {
 }
 
 /* turn indicator styles  */
-.turn {
+.turn-indicator {
 	grid-column-start: 1;
 	grid-column-end: 3;
 	align-self: center;
@@ -69,12 +69,12 @@ button:hover {
 	gap: 20px;
 }
 
-.turn p {
+.turn-indicator p {
 	font-size: 14px;
 	animation: 0.6s ease-in-out turn-text-animation;
 }
 
-.turn i {
+.turn-indicator i {
 	font-size: 1.8rem;
 	margin-left: 10px;
 	animation: 0.6s ease-in-out turn-icon-animation;
