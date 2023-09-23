@@ -22,6 +22,28 @@ export class View {
 		})
 	}
 
+	render(game, stats) {
+		const {
+			players,
+			currentPlayer,
+			status: { isComplete, winnerId },
+		} = game
+		const { playerOneWins, playerTwoWins, tieGames } = stats
+
+		this.#closeAll()
+		this.#clearMoves()
+		this.#updateScoreboard(playerOneWins, playerTwoWins, tieGames)
+		this.#initializeMoves(players)
+
+		if (isComplete) {
+			this.#openModal(winnerId ? `Player ${winnerId} wins!` : 'Tie game!')
+
+			return
+		}
+
+		this.#setTurnIndicator(currentPlayer)
+	}
+
 	// register event listeners
 	bindGameResetEvent(handler) {
 		this.$.resetBtn.addEventListener('click', handler)
@@ -37,37 +59,37 @@ export class View {
 	}
 	// utility methods
 
-	updateScoreboard(playerOneWins, playerTwoWins, tieGames) {
+	#updateScoreboard(playerOneWins, playerTwoWins, tieGames) {
 		this.$.p1Wins.innerText = `${playerOneWins} wins`
 		this.$.p2Wins.innerText = `${playerTwoWins} wins`
 		this.$.ties.innerText = `${tieGames} ties`
 	}
 
-	openModal(message) {
+	#openModal(message) {
 		this.$.modal.classList.remove('hidden')
 		this.$.modalText.innerText = message
 	}
 
-	clearMoves() {
+	#clearMoves() {
 		this.$.squares.forEach(square => square.replaceChildren())
 	}
 
-	initializeMoves(players) {
+	#initializeMoves(players) {
 		this.$.squares.forEach(square => {
 			players.forEach(player => {
 				if (player.moves.includes(square.id)) {
-					this.handlePlayerMove(square, player)
+					this.#handlePlayerMove(square, player)
 				}
 			})
 		})
 	}
 
-	closeAll() {
+	#closeAll() {
 		this.#closeModal()
 		this.#closeMenu()
 	}
 
-	setTurnIndicator(player) {
+	#setTurnIndicator(player) {
 		const icon = document.createElement('i')
 		const label = document.createElement('p')
 
@@ -78,7 +100,7 @@ export class View {
 		this.$.turnIndicator.replaceChildren(icon, label)
 	}
 
-	handlePlayerMove(squareEl, player) {
+	#handlePlayerMove(squareEl, player) {
 		const icon = document.createElement('i')
 
 		icon.classList.add('fa-solid', player.icon, player.color)

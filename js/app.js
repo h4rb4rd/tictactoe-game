@@ -8,26 +8,13 @@ function init() {
 	const store = new Store(LIVE_T3_STORAGE_KEY)
 
 	// utility funcs
-	const initView = () => {
-		view.closeAll()
-		view.clearMoves()
-		view.setTurnIndicator(store.game.currentPlayer)
-		view.updateScoreboard(
-			store.stats.playerOneWins,
-			store.stats.playerTwoWins,
-			store.stats.tieGames
-		)
-
-		view.initializeMoves(store.game.players)
-	}
-
 	const checkIsMoveExist = (players, squareId) =>
 		players.forEach(player => player.moves.includes(squareId))
 
 	// bindings
 	view.bindGameResetEvent(() => {
 		store.reset()
-		initView()
+		view.render(store.game, store.stats)
 	})
 
 	view.bindNewRoundEvent(e => {
@@ -42,30 +29,17 @@ function init() {
 			return
 		}
 
-		// place an icon of the current player in a square
-		view.handlePlayerMove(currentSquare, store.game.currentPlayer)
 		// advance to the next state
 		store.handlePlayerMove(currentSquare.id, store.game.currentPlayer.id)
 
-		// check is game complete & open modal
-		if (store.game.status.isComplete) {
-			const winnerId = store.game.status.winnerId
-			const message = winnerId ? `Player ${winnerId} wins!` : 'Tie game!'
-
-			view.openModal(message)
-
-			return
-		}
-
-		// set the next player's turn indicator
-		view.setTurnIndicator(store.game.currentPlayer)
+		view.render(store.game, store.stats)
 	})
 
 	// listen storage events
-	window.addEventListener('storage', initView)
+	window.addEventListener('storage', () => view.render(store.game, store.stats))
 
 	// initialize view
-	initView()
+	view.render(store.game, store.stats)
 }
 
 window.addEventListener('load', init)
