@@ -7,6 +7,7 @@ function init() {
 	const view = new View()
 	const store = new Store(LIVE_T3_STORAGE_KEY)
 
+	// utility funcs
 	const initView = () => {
 		view.closeAll()
 		view.clearMoves()
@@ -20,6 +21,10 @@ function init() {
 		view.initializeMoves(store.game.players)
 	}
 
+	const checkIsMoveExist = (players, squareId) =>
+		players.forEach(player => player.moves.includes(squareId))
+
+	// bindings
 	view.bindGameResetEvent(() => {
 		store.reset()
 		initView()
@@ -31,9 +36,7 @@ function init() {
 
 	view.bindPlayerMoveEvent(e => {
 		const currentSquare = e.target
-		const isMoveExist = store.game.players.forEach(player =>
-			player.moves.includes(currentSquare.id)
-		)
+		const isMoveExist = checkIsMoveExist(store.game.players, currentSquare.id)
 
 		if (isMoveExist) {
 			return
@@ -58,6 +61,10 @@ function init() {
 		view.setTurnIndicator(store.game.currentPlayer)
 	})
 
+	// listen storage events
+	window.addEventListener('storage', initView)
+
+	// initialize view
 	initView()
 }
 
