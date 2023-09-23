@@ -31,9 +31,9 @@ const initialState = {
 }
 
 export class Store {
-	#state = initialState
-
-	constructor() {}
+	constructor(storageKey) {
+		this.storageKey = storageKey
+	}
 
 	get stats() {
 		const state = this.#getState()
@@ -53,7 +53,7 @@ export class Store {
 
 		return {
 			currentPlayer: state.players[currentPlayerIdx],
-			moves: state.players[0].moves + state.players[1].moves,
+			players: state.players,
 			status: {
 				winnerId,
 				isComplete,
@@ -126,9 +126,11 @@ export class Store {
 	}
 
 	#getState() {
-		return this.#state
+		const state = localStorage.getItem(this.storageKey)
+
+		return state ? JSON.parse(state) : initialState
 	}
 	#saveState(newState) {
-		this.#state = newState
+		localStorage.setItem(this.storageKey, JSON.stringify(newState))
 	}
 }

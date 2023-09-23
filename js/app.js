@@ -1,12 +1,13 @@
 import { Store } from './store.js'
 import { View } from './view.js'
 
+const LIVE_T3_STORAGE_KEY = 'live-t3-storage-key'
+
 function init() {
 	const view = new View()
-	const store = new Store()
+	const store = new Store(LIVE_T3_STORAGE_KEY)
 
-	view.bindGameResetEvent(() => {
-		store.reset()
+	const initView = () => {
 		view.closeAll()
 		view.clearMoves()
 		view.setTurnIndicator(store.game.currentPlayer)
@@ -15,23 +16,24 @@ function init() {
 			store.stats.playerTwoWins,
 			store.stats.tieGames
 		)
+
+		view.initializeMoves(store.game.players)
+	}
+
+	view.bindGameResetEvent(() => {
+		store.reset()
+		initView()
 	})
 
 	view.bindNewRoundEvent(e => {
 		store.newRound()
-		view.closeAll()
-		view.clearMoves()
-		view.setTurnIndicator(store.game.currentPlayer)
-		view.updateScoreboard(
-			store.stats.playerOneWins,
-			store.stats.playerTwoWins,
-			store.stats.tieGames
-		)
 	})
 
 	view.bindPlayerMoveEvent(e => {
 		const currentSquare = e.target
-		const isMoveExist = store.game.moves.includes(currentSquare.id)
+		const isMoveExist = store.game.players.forEach(player =>
+			player.moves.includes(currentSquare.id)
+		)
 
 		if (isMoveExist) {
 			return
@@ -55,6 +57,8 @@ function init() {
 		// set the next player's turn indicator
 		view.setTurnIndicator(store.game.currentPlayer)
 	})
+
+	initView()
 }
 
 window.addEventListener('load', init)

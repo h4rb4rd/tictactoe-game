@@ -36,6 +36,7 @@ export class View {
 		})
 	}
 	// utility methods
+
 	updateScoreboard(playerOneWins, playerTwoWins, tieGames) {
 		this.$.p1Wins.innerText = `${playerOneWins} wins`
 		this.$.p2Wins.innerText = `${playerTwoWins} wins`
@@ -49,6 +50,16 @@ export class View {
 
 	clearMoves() {
 		this.$.squares.forEach(square => square.replaceChildren())
+	}
+
+	initializeMoves(players) {
+		this.$.squares.forEach(square => {
+			players.forEach(player => {
+				if (player.moves.includes(square.id)) {
+					this.handlePlayerMove(square, player)
+				}
+			})
+		})
 	}
 
 	closeAll() {
