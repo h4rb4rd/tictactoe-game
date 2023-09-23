@@ -30,9 +30,11 @@ const initialState = {
 	],
 }
 
-export class Store {
-	constructor(storageKey) {
+export class Store extends EventTarget {
+	constructor(storageKey, eventKey) {
+		super()
 		this.storageKey = storageKey
+		this.eventKey = eventKey
 	}
 
 	get stats() {
@@ -132,5 +134,6 @@ export class Store {
 	}
 	#saveState(newState) {
 		localStorage.setItem(this.storageKey, JSON.stringify(newState))
+		this.dispatchEvent(new Event(this.eventKey))
 	}
 }
