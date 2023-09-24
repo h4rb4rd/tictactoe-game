@@ -1,3 +1,4 @@
+import type { Player } from './types.js'
 import { Store } from './store.js'
 import { View } from './view.js'
 
@@ -9,15 +10,15 @@ function init() {
 	const store = new Store(LIVE_T3_STORAGE_KEY, STATE_CHANGE_EVENT_KEY)
 
 	// utility funcs
-	const checkIsMoveExist = (players, squareId) =>
-		players.forEach(player => player.moves.includes(squareId))
+	const checkIsMoveExist = (players: Player[], squareId: string) =>
+		players.some(player => player.moves.includes(squareId))
 
 	// bindings
 	view.bindGameResetEvent(() => {
 		store.reset()
 	})
 
-	view.bindNewRoundEvent(e => {
+	view.bindNewRoundEvent(() => {
 		store.newRound()
 	})
 

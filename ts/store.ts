@@ -1,4 +1,6 @@
-const initialState = {
+import type { Game, GameState, Stats } from './types'
+
+const initialState: GameState = {
 	players: [
 		{
 			id: 1,
@@ -31,13 +33,14 @@ const initialState = {
 }
 
 export class Store extends EventTarget {
-	constructor(storageKey, eventKey) {
+	constructor(
+		private readonly storageKey: string,
+		private readonly eventKey: string
+	) {
 		super()
-		this.storageKey = storageKey
-		this.eventKey = eventKey
 	}
 
-	get stats() {
+	get stats(): Stats {
 		const state = this.#getState()
 
 		return {
@@ -47,7 +50,7 @@ export class Store extends EventTarget {
 		}
 	}
 
-	get game() {
+	get game(): Game {
 		const state = this.#getState()
 		const currentPlayerIdx = state.totalMoves % 2
 		const winnerId = this.#checkWinner()
@@ -63,7 +66,7 @@ export class Store extends EventTarget {
 		}
 	}
 
-	handlePlayerMove(squareId, playerId) {
+	handlePlayerMove(squareId: string, playerId: number) {
 		const stateClone = structuredClone(this.#getState())
 		const currentPlayerIdx = playerId - 1
 
@@ -116,7 +119,7 @@ export class Store extends EventTarget {
 
 		for (const player of state.players) {
 			for (const pattern of state.winningPatterns) {
-				const isWin = pattern.every(v => player.moves.includes(v))
+				const isWin = pattern.every(v => player.moves.includes(`${v}`))
 
 				if (isWin) {
 					winnerId = player.id
@@ -130,9 +133,10 @@ export class Store extends EventTarget {
 	#getState() {
 		const state = localStorage.getItem(this.storageKey)
 
-		return state ? JSON.parse(state) : initialState
+		return state ? (JSON.parse(state) as GameState) : initialState
 	}
-	#saveState(newState) {
+
+	#saveState(newState: GameState) {
 		localStorage.setItem(this.storageKey, JSON.stringify(newState))
 		this.dispatchEvent(new Event(this.eventKey))
 	}

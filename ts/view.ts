@@ -1,15 +1,17 @@
+import type { Game, Player, Stats } from './types'
+
 export class View {
-	$ = {}
+	$: Record<string, Element> = {}
+	$$: Record<string, NodeListOf<Element>> = {}
 
 	constructor() {
-		// dom elements
+		// Single elements
 		this.$.turnIndicator = this.#qs('[data-id="turn-indicator"]')
 		this.$.menu = this.#qs('[data-id="menu"]')
 		this.$.menuBtn = this.#qs('[data-id="menu-btn"]')
 		this.$.menuItems = this.#qs('[data-id="menu-items"]')
 		this.$.resetBtn = this.#qs('[data-id="reset-btn"]')
 		this.$.newRoundBtn = this.#qs('[data-id="new-round-btn"]')
-		this.$.squares = this.#qsAll('[data-id="square"]')
 		this.$.modal = this.#qs('[data-id="modal"]')
 		this.$.modalText = this.#qs('[data-id="modal-text"]')
 		this.$.modalBtn = this.#qs('[data-id="modal-btn"]')
@@ -17,13 +19,15 @@ export class View {
 		this.$.p2Wins = this.#qs('[data-id="p2-wins"]')
 		this.$.ties = this.#qs('[data-id="ties"]')
 		this.$.grid = this.#qs('[data-id="grid"]')
+		// Element lists
+		this.$$.squares = this.#qsAll('[data-id="square"]')
 		// ui only event listeners
 		this.$.menuBtn.addEventListener('click', () => {
 			this.#toggleMenu()
 		})
 	}
 
-	render(game, stats) {
+	render(game: Game, stats: Stats) {
 		const {
 			players,
 			currentPlayer,
@@ -46,35 +50,39 @@ export class View {
 	}
 
 	// register event listeners
-	bindGameResetEvent(handler) {
+	bindGameResetEvent(handler: EventListener) {
 		this.$.resetBtn.addEventListener('click', handler)
 		this.$.modalBtn.addEventListener('click', handler)
 	}
-	bindNewRoundEvent(handler) {
+	bindNewRoundEvent(handler: EventListener) {
 		this.$.newRoundBtn.addEventListener('click', handler)
 	}
-	bindPlayerMoveEvent(handler) {
+	bindPlayerMoveEvent(handler: (el: Element) => void) {
 		this.#delegate(this.$.grid, '[data-id="square"]', 'click', handler)
 	}
 	// utility methods
 
-	#updateScoreboard(playerOneWins, playerTwoWins, tieGames) {
-		this.$.p1Wins.innerText = `${playerOneWins} wins`
-		this.$.p2Wins.innerText = `${playerTwoWins} wins`
-		this.$.ties.innerText = `${tieGames} ties`
+	#updateScoreboard(
+		playerOneWins: number,
+		playerTwoWins: number,
+		tieGames: number
+	) {
+		this.$.p1Wins.textContent = `${playerOneWins} wins`
+		this.$.p2Wins.textContent = `${playerTwoWins} wins`
+		this.$.ties.textContent = `${tieGames} ties`
 	}
 
-	#openModal(message) {
+	#openModal(message: string) {
 		this.$.modal.classList.remove('hidden')
-		this.$.modalText.innerText = message
+		this.$.modalText.textContent = message
 	}
 
 	#clearMoves() {
-		this.$.squares.forEach(square => square.replaceChildren())
+		this.$$.squares.forEach(square => square.replaceChildren())
 	}
 
-	#initializeMoves(players) {
-		this.$.squares.forEach(square => {
+	#initializeMoves(players: Player[]) {
+		this.$$.squares.forEach(square => {
 			players.forEach(player => {
 				if (player.moves.includes(square.id)) {
 					this.#handlePlayerMove(square, player)
@@ -88,7 +96,7 @@ export class View {
 		this.#closeMenu()
 	}
 
-	#setTurnIndicator(player) {
+	#setTurnIndicator(player: Player) {
 		const icon = document.createElement('i')
 		const label = document.createElement('p')
 
@@ -99,7 +107,7 @@ export class View {
 		this.$.turnIndicator.replaceChildren(icon, label)
 	}
 
-	#handlePlayerMove(squareEl, player) {
+	#handlePlayerMove(squareEl: Element, player: Player) {
 		const icon = document.createElement('i')
 
 		icon.classList.add('fa-solid', player.icon, player.color)
@@ -111,7 +119,7 @@ export class View {
 	}
 
 	#closeMenu() {
-		const icon = this.$.menuBtn.querySelector('i')
+		const icon = this.#qs('i', this.$.menuBtn)
 
 		this.$.menuItems.classList.add('hidden')
 		this.$.menuBtn.classList.remove('border')
@@ -121,7 +129,7 @@ export class View {
 	}
 
 	#toggleMenu() {
-		const icon = this.$.menuBtn.querySelector('i')
+		const icon = this.#qs('i', this.$.menuBtn)
 
 		this.$.menuItems.classList.toggle('hidden')
 		this.$.menuBtn.classList.toggle('border')
@@ -130,7 +138,7 @@ export class View {
 		icon.classList.toggle('fa-chevron-up')
 	}
 
-	#qs(selector, parent) {
+	#qs(selector: string, parent?: Element) {
 		const el = parent
 			? parent.querySelector(selector)
 			: document.querySelector(selector)
@@ -142,7 +150,7 @@ export class View {
 		return el
 	}
 
-	#qsAll(selector) {
+	#qsAll(selector: string) {
 		const elList = document.querySelectorAll(selector)
 
 		if (!elList) {
@@ -152,8 +160,17 @@ export class View {
 		return elList
 	}
 
-	#delegate(el, selector, eventKey, handler) {
+	#delegate(
+		el: Element,
+		selector: string,
+		eventKey: string,
+		handler: (el: Element) => void
+	) {
 		el.addEventListener(eventKey, event => {
+			if (!(event.target instanceof Element)) {
+				throw new Error('Event target not found')
+			}
+
 			if (event.target.matches(selector)) {
 				handler(event.target)
 			}
